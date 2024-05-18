@@ -1,0 +1,34 @@
+"""
+Created on Sun Apr 28 21:49:50 2024
+
+@author: DC Candido
+"""
+
+# Bayesian Regression with PyMC3
+import numpy as np
+import matplotlib.pyplot as plt
+import pymc3 as pm
+
+np.random.seed(0)
+X = np.linspace(0, 10, 100)
+true_slope = 2
+true_intercept = 1
+true_sigma = 1
+Y = true_slope * X + true_intercept + np.random.normal(scale=true_sigma, size=X.shape)
+
+with pm.Model() as model:
+    
+    slope = pm.Normal('slope', mu=0, sd=10)
+    intercept = pm.Normal('intercept', mu=0, sd=10)
+    sigma= pm.HalfNormal('sigma', sd=1)
+    
+    mu = slope * X + intercept
+    
+    Y_obs = pm.Normal('Y_obs', mu=mu, sd=sigma, observed=Y)
+    
+
+with model:
+    trace = pm.sample(1000, tune=1000)
+    
+pm.traceplot(trace)
+plt.show()
